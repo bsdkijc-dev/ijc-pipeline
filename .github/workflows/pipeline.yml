@@ -1,0 +1,98 @@
+name: IJC Pipeline CI/CD
+
+'on':
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      allow_invalid:
+        description: 'Bypass integrity check errors (ALLOW_INVALID=1)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  pipeline:
+    name: Validate, Build, Moodle & Multi-Target Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate data integrity
+        env:
+          ALLOW_INVALID: ${{ (inputs.allow_invalid || false) && '1' || '' }}
+          GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          python scripts/validate.py
+
+      - name: Build all distribution artifacts
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          python scripts/build.py
+
+      - name: Upload Kaggle dataset artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaggle-dataset
+          path: dist/kaggle/
+          if-no-files-found: error
+
+      - name: Upload MediaWiki pages artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-pages
+          path: dist/wiki/
+          if-no-files-found: error
+
+      - name: Upload Moodle Question Bank artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: moodle-question-bank
+          path: dist/moodle/
+          if-no-files-found: error
+
+      - name: Upload Neo4j Cypher artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neo4j-cypher
+          path: dist/neo4j/
+          if-no-files-found: error
+
+      - name: Upload Qdrant Vector points artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qdrant-vectors
+          path: dist/qdrant/
+          if-no-files-found: error
+
+      - name: Publish to MediaWiki
+        if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch')
+        env:
+          MEDIAWIKI_URL: ${{ secrets.MEDIAWIKI_URL }}
+          MEDIAWIKI_USER: ${{ secrets.MEDIAWIKI_USER }}
+          MEDIAWIKI_PASSWORD: ${{ secrets.MEDIAWIKI_PASSWORD }}
+        run: |
+          if [ -n "$MEDIAWIKI_URL" ] && [ -n "$MEDIAWIKI_USER" ] && [ -n "$MEDIAWIKI_PASSWORD" ]; then
+            python scripts/publish_wiki.py
+          else
+            echo "MediaWiki credentials not configured. Skipping sync."
+          fi

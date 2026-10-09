@@ -1,0 +1,51 @@
+name: Validate, build and publish IJC knowledge
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 1 * * *"       # daily, 01:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      MEDIAWIKI_URL: ${{ secrets.MEDIAWIKI_URL }}
+      MEDIAWIKI_USER: ${{ secrets.MEDIAWIKI_USER }}
+      MEDIAWIKI_PASSWORD: ${{ secrets.MEDIAWIKI_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Validate (fails on bad hashes or broken cross-references)
+        run: python scripts/validate.py
+
+      - name: Build dist/
+        run: python scripts/build.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to MediaWiki
+        if: github.ref == 'refs/heads/main' && env.MEDIAWIKI_URL != ''
+        run: python scripts/publish_wiki.py
+
+      - name: Publish to Kaggle
+        if: github.ref == 'refs/heads/main' && env.KAGGLE_KEY != ''
+        run: |
+          kaggle datasets version -p dist/kaggle -m "Sync ${{ github.sha }}" --dir-mode zip \
+          || kaggle datasets create -p dist/kaggle --dir-mode zip
