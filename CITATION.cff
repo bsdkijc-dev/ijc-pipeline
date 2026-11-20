@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "IJC Four-Mode Judicial Knowledge pipeline"
+authors:
+  - family-names: "Mustafa"
+    given-names: "Cecep"
+    orcid: "https://orcid.org/0000-0003-0037-497X"
+    affiliation: "Indonesian Judicial College (IJC)"
+abstract: "Scripts that build the IJC judicial knowledge objects into Kaggle tables, wiki pages, a Moodle question bank, Neo4j Cypher and Qdrant vectors."
+repository-code: "https://github.com/bsdkijc-dev/ijc-pipeline"
+url: "https://www.kaggle.com/datasets/judicialcollege/ijc-judicial-knowledge"
+license: MIT
+keywords: [Indonesia, judicial education, knowledge management, Moodle, knowledge graph]
