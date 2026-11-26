@@ -1,4 +1,18 @@
-# IJC Four-Mode Judicial Knowledge pipeline
+<div align="center">
+
+<img src="assets/logo.png" alt="IJC Four-Mode Judicial Knowledge Pipeline Logo" width="140">
+
+# IJC Four-Mode Judicial Knowledge Pipeline
+
+### Convert the IJC knowledge workbook into Kaggle tables, MediaWiki pages, Moodle XML, Neo4j graphs, and Qdrant vectors.
+
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE) ![Stack](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white) [![CI](https://github.com/bsdkijc-dev/ijc-pipeline/actions/workflows/pipeline.yml/badge.svg)](https://github.com/bsdkijc-dev/ijc-pipeline/actions/workflows/pipeline.yml) [![Kaggle](https://img.shields.io/badge/Kaggle-Dataset-20BEFF?style=flat&logo=kaggle&logoColor=white)](https://www.kaggle.com/datasets/judicialcollege/ijc-judicial-knowledge)
+
+[Documentation](scripts/) · [Kaggle](https://www.kaggle.com/datasets/judicialcollege/ijc-judicial-knowledge) · [Repository](https://github.com/bsdkijc-dev/ijc-pipeline)
+
+</div>
+
+---
 
 Scripts that turn the Indonesian Judicial College (IJC) knowledge workbook (`data/ijc.xlsx`) into Kaggle tables, wiki pages, a Moodle question bank, a Neo4j graph and Qdrant vectors.
 
@@ -27,3 +41,13 @@ GitHub also shows a "Cite this repository" button, built from `CITATION.cff`.
 ## Licence
 
 MIT. See `LICENSE`.
+
+---
+
+<div align="center">
+
+**IJC Four-Mode Judicial Knowledge Pipeline**
+
+[github.com/bsdkijc-dev/ijc-pipeline](https://github.com/bsdkijc-dev/ijc-pipeline)
+
+</div>
